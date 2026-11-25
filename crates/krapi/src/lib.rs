@@ -35,22 +35,36 @@
 //! * [`engine`] — the dynamic loop set: pumps, dispatcher, workers, beat
 
 pub mod api;
+#[cfg(feature = "engine")]
 pub mod cel;
+#[cfg(feature = "engine")]
 pub mod conditions;
+#[cfg(feature = "engine")]
 pub mod crd;
+#[cfg(feature = "engine")]
 pub mod dag;
-pub mod engine;
 pub mod expression;
-pub mod face;
+#[cfg(feature = "engine")]
 pub mod graph;
+#[cfg(feature = "engine")]
 pub mod labels;
+
+#[cfg(feature = "controller")]
+pub mod engine;
+#[cfg(feature = "engine")]
+pub mod face;
 mod quantity;
+#[cfg(feature = "controller")]
 pub mod reconciler;
 pub mod rgd_resources;
 pub mod simpleschema;
 
 pub use api::ResourceGraphDefinition;
+#[cfg(feature = "controller")]
 pub use engine::{Engine, EngineConfig};
+#[cfg(feature = "controller")]
 pub use face::{Action, Face, FaceError, Listed, SharedFace, Target, WatchEvent};
+#[cfg(feature = "engine")]
 pub use graph::{CompileError, CompiledGraph};
+#[cfg(feature = "engine")]
 pub use labels::{FINALIZER, LABEL_PREFIX, MANAGED_BY_KEY, MANAGED_BY_VALUE};

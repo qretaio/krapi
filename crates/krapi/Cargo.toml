@@ -9,26 +9,32 @@ description = "the kube resource orchestrator engine: ResourceGraphDefinitions c
 name = "krapi"
 path = "src/lib.rs"
 
+[features]
+default = ["controller"]
+# Tier 1: RGD types, SimpleSchema, typed resource builders — no engine.
+types = []
+# Tier 2: + compile/CRD synthesis (CEL, graph, CRD). Includes `types`.
+engine = ["types", "dep:cel", "dep:regex", "dep:url", "dep:k8s-openapi", "dep:sha2", "dep:md-5", "dep:jiff", "dep:tracing", "dep:tokio", "dep:kube-core"]
+# Tier 3: + reconciliation + list/watch/apply faces. Includes `engine`.
+controller = ["engine", "dep:tokio", "dep:kube-core"]
+
 [dependencies]
 serde = { workspace = true }
 serde_json = { workspace = true }
-cel = { workspace = true }
-# the k8s CEL libraries cel-rust does not ship: find/findAll (regex)
-# and the url() family (url)
-regex = "1"
-url = { workspace = true }
-# the shared watch-event envelope (reused with kapi — same type, and in
-# the embedded deployment the same binary)
-kube-core = { workspace = true }
-# one API-version pin across the graph (the kapi convention): a lib
-# graph without any v1_* feature refuses to build
-k8s-openapi = { workspace = true, features = ["v1_33"] }
-tokio = { workspace = true }
-tracing = { workspace = true }
+# The engine tier needs CEL evaluation + the k8s CEL extension libraries.
+cel = { workspace = true, optional = true }
+regex = { version = "1", optional = true }
+url = { workspace = true, optional = true }
+# The controller tier rides the shared watch-event envelope.
+kube-core = { workspace = true, optional = true }
+# One API-version pin across the graph (the kapi convention).
+k8s-openapi = { workspace = true, features = ["v1_33"], optional = true }
+tokio = { workspace = true, optional = true }
+tracing = { workspace = true, optional = true }
 thiserror = { workspace = true }
-sha2 = { workspace = true }
-md-5 = { workspace = true }
-jiff = { workspace = true }
+sha2 = { workspace = true, optional = true }
+md-5 = { workspace = true, optional = true }
+jiff = { workspace = true, optional = true }
 
 [dev-dependencies]
 serde_yaml = { workspace = true }
