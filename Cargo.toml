@@ -1,0 +1,145 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/krapi",
+    "crates/krapi-rgd",
+    "crates/krapi-kube",
+]
+exclude = ["compatibility/upstream"]
+
+[package]
+name = "krapi-cli-bin"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+description = "The krapi CLI: validate RGDs, generate CRDs, run the standalone controller"
+
+[[bin]]
+name = "krapi"
+path = "src/main.rs"
+
+[dependencies]
+krapi = { path = "crates/krapi" }
+krapi-kube = { path = "crates/krapi-kube" }
+serde_json = "1"
+serde_yaml = "0.9"
+tokio = { version = "1", features = ["full"] }
+clap = { version = "4", features = ["derive", "env"] }
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["full"] }
+futures-util = "0.3"
+axum = { version = "0.8", features = ["ws"] }
+base64 = "0.22"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+json-patch = "3"
+k8s-openapi = { version = "0.29", features = ["v1_33"] }
+# the CEL rules the CRD schemas carry (x-kubernetes-validations)
+kube-cel = { version = "0.8", features = ["validation"] }
+# the kro engine + its embed adapter (the ResourceGraphDefinition
+# controller beside the rest of the embedded loops) — both are workspace
+# members now, so these are plain path deps inside one lockfile.
+krapi = { path = "crates/krapi" }
+krapi-kapi = { path = "crates/krapi-kapi" }
+# aliases kro's crates use for kapi's packages (same workspace, no
+# second path spelling)
+# kro's hashing + CEL-serde needs
+sha2 = "0.10"
+md-5 = "0.10"
+reqwest = { version = "0.12", features = ["json"] }
+# the admission chain's CEL environment (VAP/MutAP expressions) —
+# cel-rust 0.16: the cel-spec-conformant release with the optional
+# syntax (a.?b / orValue) and the cel-go extension libraries upstream
+# kro registers (strings/lists/encoders/bindings/two-var/network).
+# kube-cel 0.8 still pins ^0.13 internally; both majors coexist.
+cel = { version = "0.16", features = ["json"] }
+# the kro CEL library's k8s url()/regex find/findAll arms
+url = "2"
+jiff = { version = "0.2", features = ["serde"] }
+
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1"
+thiserror = "2"
+
+clap = { version = "4", features = ["derive", "env"] }
+
+
+# — the htp faces (feature `htp`, slice 1b: the coordinator's htcp-inproc
+# transport twin) —
+
+# — the CRD surface's async traits and the watch stream plumbing —
+async-trait = "0.1"
+tokio-stream = "0.1"
+bytes = "1"
+# The typed Kubernetes Gateway API — the gateway builds its route table
+# from typed HttpRoute CRDs (gateway.networking.k8s.io), and the typed
+# CustomResourceExt mechanism gives us the CRD + the spec/rules/path
+# shapes. Version 0.23 rides kube 5 / k8s-openapi 0.29, already pinned.
+gateway-api = { version = "0.23", default-features = false }
+
+# the tower middleware stack (the kubelet's call layer, the server's face)
+tower = { version = "0.5", default-features = false }
+# the CRI client slice: k8s-cri's generated gRPC types ride a tonic channel
+# over a unix socket (the k8s-native CRI endpoint CRI-O listens on)
+# CRI-O's /etc/crio/crio.conf.d/*.conf is TOML — the node's native config
+
+kube = { version = "5", default-features = false, features = ["client", "config", "rustls-tls", "ring", "derive"] }
+# In-process calls ride plain Tokio channels (crates/server/src/hub);
+# remote calls ride the HTTP watch API (crates/kubelet/src/http.rs).
+# No shared-memory IPC medium is compiled into kapi.
+kube-core = { version = "5", default-features = false }
+
+
+# — dev —
+proptest = "1"
+tempfile = "3"
+
+[workspace.lints.rust]
+future_incompatible = { level = "deny", priority = -1 }
+nonstandard_style = { level = "deny", priority = -1 }
+rust_2024_compatibility = { level = "deny", priority = -1 }
+missing_debug_implementations = "deny"
+missing_copy_implementations = "deny"
+trivial_casts = "deny"
+trivial_numeric_casts = "deny"
+unsafe_op_in_unsafe_fn = "deny"
+unused_import_braces = "deny"
+unused_lifetimes = "deny"
+unused_qualifications = "deny"
+variant_size_differences = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -2 }
+pedantic = { level = "deny", priority = -1 }
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+exit = "deny"
+mem_forget = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+module_name_repetitions = "allow"
+multiple_crate_versions = "allow"
+future_not_send = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+doc_markdown = "allow"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+opt-level = "z"

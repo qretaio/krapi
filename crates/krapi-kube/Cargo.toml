@@ -1,0 +1,40 @@
+[package]
+name = "krapi-kube"
+version.workspace = true
+edition.workspace = true
+license = "Apache-2.0"
+description = "the standalone kro face: list/watch/apply over kube-rs (the CLI lives in kro-cli)"
+
+[dependencies]
+krapi = { path = "../krapi" }
+kube = { workspace = true }
+kube-core = { workspace = true }
+
+k8s-openapi = { workspace = true, features = ["v1_33"] }
+futures-util = { workspace = true }
+secrecy = "0.10"
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+
+# kro's own lint posture (kept across the workspace merge): the engine's
+# code uses crate-qualified paths and opaque small markers by design.
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+exit = "deny"
+mod_module_files = "deny"
+
+[dev-dependencies]
+serde_yaml = { workspace = true }
+tracing-subscriber = { workspace = true }
+axum = { version = "0.8", default-features = false, features = ["tokio", "http1"] }
+tempfile = "3"
+reqwest = { version = "0.12", features = ["json"] }

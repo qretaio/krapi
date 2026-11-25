@@ -1,0 +1,48 @@
+[package]
+name = "krapi"
+version.workspace = true
+edition.workspace = true
+license = "Apache-2.0"
+description = "the kube resource orchestrator engine: ResourceGraphDefinitions compiled to dependency graphs, instances reconciled over any list/watch/apply face"
+
+[lib]
+name = "krapi"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+cel = { workspace = true }
+# the k8s CEL libraries cel-rust does not ship: find/findAll (regex)
+# and the url() family (url)
+regex = "1"
+url = { workspace = true }
+# the shared watch-event envelope (reused with kapi — same type, and in
+# the embedded deployment the same binary)
+kube-core = { workspace = true }
+# one API-version pin across the graph (the kapi convention): a lib
+# graph without any v1_* feature refuses to build
+k8s-openapi = { workspace = true, features = ["v1_33"] }
+tokio = { workspace = true }
+tracing = { workspace = true }
+thiserror = { workspace = true }
+sha2 = { workspace = true }
+md-5 = { workspace = true }
+jiff = { workspace = true }
+
+[dev-dependencies]
+serde_yaml = { workspace = true }
+
+# kro's own lint posture (kept across the workspace merge): the engine's
+# code uses crate-qualified paths and opaque small markers by design.
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+exit = "deny"
+mod_module_files = "deny"
