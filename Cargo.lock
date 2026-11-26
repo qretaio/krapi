@@ -1190,12 +1190,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "kapi-ext"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "serde_json",
+ "serde_yaml",
+]
+
+[[package]]
 name = "krapi"
 version = "0.1.0"
 dependencies = [
  "cel",
  "jiff",
  "k8s-openapi",
+ "kapi-ext",
  "kube-core",
  "md-5",
  "regex",

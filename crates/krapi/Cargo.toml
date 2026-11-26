@@ -19,6 +19,7 @@ engine = ["types", "dep:cel", "dep:regex", "dep:url", "dep:k8s-openapi", "dep:sh
 controller = ["engine", "dep:tokio", "dep:kube-core"]
 
 [dependencies]
+kapi-ext = { path = "../../../kapi-ext" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 # The engine tier needs CEL evaluation + the k8s CEL extension libraries.

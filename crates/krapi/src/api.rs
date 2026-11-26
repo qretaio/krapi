@@ -124,6 +124,78 @@ pub enum Scope {
 }
 
 /// One resource in the graph.
+impl Resource {
+    /// Parse one RGD resource from its JSON shape (kapi-ext manifests).
+    pub fn from_json(v: &serde_json::Value) -> Result<Self, String> {
+        let id = v
+            .get("id")
+            .and_then(serde_json::Value::as_str)
+            .ok_or("resource.id")?
+            .to_owned();
+        let order = v
+            .get("order")
+            .and_then(serde_json::Value::as_u64)
+            .unwrap_or(0) as usize;
+        let template = v.get("template").cloned().filter(|t| !t.is_null());
+        let external_ref = match v.get("externalRef") {
+            Some(e) if e.is_object() => Some(ExternalRef {
+                api_version: e
+                    .get("apiVersion")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or_default()
+                    .to_owned(),
+                kind: e
+                    .get("kind")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or_default()
+                    .to_owned(),
+                namespace: e
+                    .get("metadata")
+                    .and_then(|m| m.get("namespace"))
+                    .and_then(serde_json::Value::as_str)
+                    .map(str::to_owned),
+                name: e
+                    .get("metadata")
+                    .and_then(|m| m.get("name"))
+                    .and_then(serde_json::Value::as_str)
+                    .map(str::to_owned),
+            }),
+            _ => None,
+        };
+        let strings = |k: &str| -> Vec<String> {
+            v.get(k)
+                .and_then(serde_json::Value::as_array)
+                .map(|a| {
+                    a.iter()
+                        .filter_map(|x| x.as_str().map(str::to_owned))
+                        .collect()
+                })
+                .unwrap_or_default()
+        };
+        let for_each = v
+            .get("forEach")
+            .and_then(serde_json::Value::as_array)
+            .map(|a| {
+                a.iter()
+                    .filter_map(|x| {
+                        let k = x.get("key").or_else(|| x.get("name"))?.as_str()?;
+                        let val = x.get("value").or_else(|| x.get("expr"))?.as_str()?;
+                        Some((k.to_owned(), val.to_owned()))
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+        Ok(Self {
+            id,
+            order,
+            template,
+            external_ref,
+            ready_when: strings("readyWhen"),
+            include_when: strings("includeWhen"),
+            for_each,
+        })
+    }
+}
 #[derive(Debug, Clone, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Resource {
