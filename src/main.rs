@@ -8,7 +8,7 @@
 
 use clap::{Parser, Subcommand};
 use krapi::graph::{CompileError, EngineDefaults};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
 #[command(
@@ -45,10 +45,12 @@ struct GenerateArgs {
 
 #[derive(Subcommand)]
 enum GenerateCmd {
-    /// Print the synthesized instance CRD.
+    /// Print a CRD: with --file, the instance CRD synthesized from that
+    /// RGD (upstream behavior); without --file, the RGD CRD itself
+    /// (`krapi generate crd | kubectl apply -f -`).
     Crd {
         #[arg(short, long, value_name = "FILE")]
-        file: PathBuf,
+        file: Option<PathBuf>,
         /// Output format.
         #[arg(long, value_enum, default_value_t = Format::Yaml)]
         format: Format,
@@ -100,7 +102,7 @@ fn main() -> anyhow::Result<()> {
                     format,
                     instance_group,
                 },
-        }) => generate_crd(&file, format, &instance_group),
+        }) => generate_crd(file.as_deref(), format, &instance_group),
         Cmd::Run(args) => run(args),
     }
 }
@@ -115,6 +117,39 @@ fn read_rgd(path: &PathBuf) -> anyhow::Result<serde_json::Value> {
         .map_err(|e| anyhow::anyhow!("{} is not a JSON-shaped object: {e}", path.display()))
 }
 
+/// The ResourceGraphDefinition CRD itself — emitted when `generate crd`
+/// is invoked without an RGD file (`krapi generate crd | kubectl apply -f -`).
+fn rgd_crd() -> serde_json::Value {
+    serde_json::json!({
+        "apiVersion": "apiextensions.k8s.io/v1",
+        "kind": "CustomResourceDefinition",
+        "metadata": {"name": "resourcegraphdefinitions.kro.run"},
+        "spec": {
+            "group": "kro.run",
+            "scope": "Cluster",
+            "names": {
+                "plural": "resourcegraphdefinitions",
+                "singular": "resourcegraphdefinition",
+                "kind": "ResourceGraphDefinition",
+                "listKind": "ResourceGraphDefinitionList",
+                "shortNames": ["rgd"],
+            },
+            "versions": [{
+                "name": "v1alpha1",
+                "served": true,
+                "storage": true,
+                "subresources": {"status": {}},
+                "schema": {"openAPIV3Schema": {
+                    "type": "object",
+                    "properties": {
+                        "spec": {"type": "object", "x-kubernetes-preserve-unknown-fields": true},
+                        "status": {"type": "object", "x-kubernetes-preserve-unknown-fields": true},
+                    },
+                }},
+            }],
+        },
+    })
+}
 /// Compile exactly as the controller does; returns the parsed RGD + graph.
 fn compile(
     path: &PathBuf,
@@ -145,11 +180,14 @@ fn validate(path: &PathBuf, instance_group: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn generate_crd(path: &PathBuf, format: Format, instance_group: &str) -> anyhow::Result<()> {
-    let (_, graph) = compile(path, instance_group)?;
+fn generate_crd(path: Option<&Path>, format: Format, instance_group: &str) -> anyhow::Result<()> {
+    let crd = match path {
+        Some(p) => compile(&p.to_path_buf(), instance_group)?.1.instance_crd,
+        None => rgd_crd(),
+    };
     match format {
-        Format::Json => println!("{}", serde_json::to_string_pretty(&graph.instance_crd)?),
-        Format::Yaml => println!("{}", serde_yaml::to_string(&graph.instance_crd)?),
+        Format::Json => println!("{}", serde_json::to_string_pretty(&crd)?),
+        Format::Yaml => println!("{}", serde_yaml::to_string(&crd)?),
     }
     Ok(())
 }
