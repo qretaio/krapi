@@ -1,0 +1,62 @@
+name: build krapi image
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: krapi-image-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust (nightly — edition 2024 / current deps)
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+          targets: x86_64-unknown-linux-musl
+
+      - name: Install musl toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq musl-tools
+
+      - name: Build static musl binary
+        env:
+          CC_x86_64_unknown_linux_musl: x86_64-linux-musl-gcc
+        run: cargo build --release --target x86_64-unknown-linux-musl --bin krapi
+
+      - name: Stage binary for the image
+        run: |
+          mkdir -p build
+          cp target/x86_64-unknown-linux-musl/release/krapi build/krapi
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ghcr.io/qretaio/krapi:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
