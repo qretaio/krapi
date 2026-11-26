@@ -1,6 +1,9 @@
 //! AssetsOnlyApp: a definition-only RGD (no resources) for kapigate.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use krapi::{api, graph::{self, EngineDefaults}};
+use krapi::{
+    api,
+    graph::{self, EngineDefaults},
+};
 const RGD: &str = include_str!("../../../../kapi/manifests/rgd/assetsonlyapp.yaml");
 #[test]
 fn assets_only_app_rgd_compiles() {
