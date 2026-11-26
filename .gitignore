@@ -1,2 +1,3 @@
 compatibility/upstream/
+compatibility/.kapi-test-*.db*
 target/
