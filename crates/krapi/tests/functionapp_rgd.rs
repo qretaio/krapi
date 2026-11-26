@@ -1,6 +1,9 @@
 //! FunctionApp: the single app RGD that replaces WorkerJs/WorkerPy.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
-use krapi::{api, graph::{self, EngineDefaults}};
+use krapi::{
+    api,
+    graph::{self, EngineDefaults},
+};
 const RGD: &str = include_str!("../../../../kapi/manifests/rgd/functionapp.yaml");
 #[test]
 fn functionapp_rgd_compiles() {
