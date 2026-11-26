@@ -302,7 +302,7 @@ pub async fn ensure_rgd_crd(face: &impl Face, group: &str, version: &str) -> Res
                 tracing::info!(group = %group, "kro: the RGD CRD is installed");
                 return Ok(());
             }
-            Err(FaceError::Invalid(m))
+            Err(FaceError::Invalid(m) | FaceError::Other(m))
                 if m.contains("already exists") || m.contains("AlreadyExists") =>
             {
                 tracing::info!(group = %group, "kro: the RGD CRD is already served");

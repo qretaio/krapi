@@ -1,0 +1,46 @@
+# Native (non-RGD) bootstrap for the krapi controller process.
+# krapi watches RGDs/instances on kapi over HTTP via its kube face.
+apiVersion: v1
+kind: Service
+metadata:
+  name: krapi
+  namespace: default
+  labels:
+    app: krapi
+spec:
+  selector:
+    app: krapi
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8643
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: krapi
+  namespace: default
+  labels:
+    app: krapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: krapi
+  template:
+    metadata:
+      labels:
+        app: krapi
+    spec:
+      containers:
+        - name: krapi
+          image: ghcr.io/qretaio/krapi:latest
+          args:
+            - run
+            - --server=http://kapi.default.svc:8643
+            - --namespace=default
+            - --rgd-group=kro.run
+            - --instance-group=kro.run
+          ports:
+            - name: http
+              containerPort: 8643
