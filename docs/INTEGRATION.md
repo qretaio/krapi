@@ -47,7 +47,7 @@ All three steps are in, exactly as designed:
    label constants) so the host needs one crate only.
 
 2. **The RGD seed** — `apiserver::rgd_crd()` in `inbuilt_crds()`:
-   `resourcegraphdefinitions.kro.rs`, cluster-scoped, spec AND status
+   `resourcegraphdefinitions.kro.run`, cluster-scoped, spec AND status
    `x-kubernetes-preserve-unknown-fields` (the engine writes its own
    status projection through the status subresource). The seed buys the
    delete-guard protection and discovery registration for the RGD kind
@@ -66,7 +66,7 @@ All three steps are in, exactly as designed:
    Dropping the returned `JoinHandle` detaches the engine's task
    (tokio's spawn semantics) — it runs beside the kubelet loops, never
    blocking them. `EngineConfig::default()` is workers 4, tick 2s,
-   backoff 2s→60s, the `kro.rs`/`v1alpha1` defaults.
+   backoff 2s→60s, the `kro.run`/`v1alpha1` defaults.
 
 No other changes. The proof is `crates/kro-kapi/tests/embed.rs`: it boots
 the real server (`seed_inbuilt_crds` + `hub::serve_channel` + the axum
@@ -102,7 +102,7 @@ ACTIVE + projection + Ready fold + finalizer, wave deletion, drain.
 2. **Worker count** — default 2. kro's passes are I/O-bound (applies);
    the pump fan-out is per-GVR. Tune via `EngineConfig` after a real
    graph lands.
-3. **The kro.rs group** — a normal CRD group (not reserved), so the seed
+3. **The kro.run group** — a normal CRD group (not reserved), so the seed
    rides the standard path. If the group should ever change, it is one
    constant (`EngineDefaults::instance_group`) plus the seed's group.
 4. **Standalone kro against the kapi server** — supported today (the

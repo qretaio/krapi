@@ -13,7 +13,7 @@ const FUNCTION_RGD: &str = include_str!("../../../manifests/rgd/function.yaml");
 fn parse_rgd() -> api::ResourceGraphDefinition {
     let body: serde_json::Value =
         serde_yaml::from_str(FUNCTION_RGD).expect("Function RGD is valid YAML");
-    api::parse(&body, "kro.rs").expect("Function RGD parses")
+    api::parse(&body, "kro.run").expect("Function RGD parses")
 }
 
 #[test]

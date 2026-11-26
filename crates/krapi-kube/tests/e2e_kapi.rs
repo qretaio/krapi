@@ -32,7 +32,7 @@ async fn server() -> String {
 /// The RGD under test: one child CRD whose spec mirrors the instance
 /// spec, gated on a second child's status (the classic two-step).
 const RGD: &str = r#"{
-    "apiVersion": "kro.rs/v1alpha1",
+    "apiVersion": "kro.run/v1alpha1",
     "kind": "ResourceGraphDefinition",
     "metadata": {"name": "webstore"},
     "spec": {
@@ -111,7 +111,7 @@ async fn the_standalone_engine_reconciles_against_a_kapi_server() {
     // runner binary drives it.
     let client = krapi_kube::connect(&url, None, "default").unwrap();
     let face = SharedFace::erase(krapi_kube::KubeFace::new(client));
-    krapi_kube::ensure_rgd_crd(&face, "kro.rs", "v1alpha1")
+    krapi_kube::ensure_rgd_crd(&face, "kro.run", "v1alpha1")
         .await
         .expect("the RGD CRD installs");
 
@@ -150,7 +150,7 @@ async fn the_standalone_engine_reconciles_against_a_kapi_server() {
     let (code, _) = http_json(
         "POST",
         &url,
-        "/apis/kro.rs/v1alpha1/resourcegraphdefinitions",
+        "/apis/kro.run/v1alpha1/resourcegraphdefinitions",
         Some(RGD.to_owned()),
     )
     .await;
@@ -163,7 +163,7 @@ async fn the_standalone_engine_reconciles_against_a_kapi_server() {
             let (code, body) = http_json(
                 "GET",
                 &url,
-                "/apis/kro.rs/v1alpha1/resourcegraphdefinitions/webstore",
+                "/apis/kro.run/v1alpha1/resourcegraphdefinitions/webstore",
                 None,
             )
             .await;
@@ -194,7 +194,7 @@ async fn the_standalone_engine_reconciles_against_a_kapi_server() {
         let (code, body) = http_json(
             "GET",
             &url,
-            "/apis/apiextensions.k8s.io/v1/customresourcedefinitions/webstores.kro.rs",
+            "/apis/apiextensions.k8s.io/v1/customresourcedefinitions/webstores.kro.run",
             None,
         )
         .await;
@@ -206,9 +206,9 @@ async fn the_standalone_engine_reconciles_against_a_kapi_server() {
     let (code, _) = http_json(
         "POST",
         &url,
-        "/apis/kro.rs/v1alpha1/namespaces/default/webstores",
+        "/apis/kro.run/v1alpha1/namespaces/default/webstores",
         Some(
-            r#"{"apiVersion": "kro.rs/v1alpha1", "kind": "WebStore",
+            r#"{"apiVersion": "kro.run/v1alpha1", "kind": "WebStore",
             "metadata": {"name": "shop"},
             "spec": {"name": "shop", "image": "nginx:1.25"}}"#
                 .to_owned(),
@@ -260,7 +260,7 @@ async fn the_standalone_engine_reconciles_against_a_kapi_server() {
             let (code, body) = http_json(
                 "GET",
                 &url,
-                "/apis/kro.rs/v1alpha1/namespaces/default/webstores/shop",
+                "/apis/kro.run/v1alpha1/namespaces/default/webstores/shop",
                 None,
             )
             .await;
@@ -298,14 +298,14 @@ async fn the_standalone_engine_reconciles_against_a_kapi_server() {
     assert!(
         inst.pointer("/metadata/finalizers")
             .and_then(|f| f.as_array())
-            .is_some_and(|f| f.iter().any(|x| x.as_str() == Some("kro.rs/finalizer")))
+            .is_some_and(|f| f.iter().any(|x| x.as_str() == Some("kro.run/finalizer")))
     );
 
     // Deletion: children drain, the finalizer drops, the row goes.
     let (code, _) = http_json(
         "DELETE",
         &url,
-        "/apis/kro.rs/v1alpha1/namespaces/default/webstores/shop",
+        "/apis/kro.run/v1alpha1/namespaces/default/webstores/shop",
         None,
     )
     .await;
@@ -329,7 +329,7 @@ async fn the_standalone_engine_reconciles_against_a_kapi_server() {
             let (code, body) = http_json(
                 "GET",
                 &url,
-                "/apis/kro.rs/v1alpha1/namespaces/default/webstores/shop",
+                "/apis/kro.run/v1alpha1/namespaces/default/webstores/shop",
                 None,
             )
             .await;

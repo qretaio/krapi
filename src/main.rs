@@ -28,7 +28,7 @@ enum Cmd {
         #[arg(short, long, value_name = "FILE")]
         file: PathBuf,
         /// Group generated instance CRDs land in when the RGD omits one.
-        #[arg(long, default_value = "kro.rs", env = "KRO_INSTANCE_GROUP")]
+        #[arg(long, default_value = "kro.run", env = "KRO_INSTANCE_GROUP")]
         instance_group: String,
     },
     /// Generate an artifact from an RGD.
@@ -52,7 +52,7 @@ enum GenerateCmd {
         /// Output format.
         #[arg(long, value_enum, default_value_t = Format::Yaml)]
         format: Format,
-        #[arg(long, default_value = "kro.rs", env = "KRO_INSTANCE_GROUP")]
+        #[arg(long, default_value = "kro.run", env = "KRO_INSTANCE_GROUP")]
         instance_group: String,
     },
 }
@@ -71,11 +71,11 @@ struct RunArgs {
     token: Option<String>,
     #[arg(long, default_value = "default", env = "KRO_NAMESPACE")]
     namespace: String,
-    #[arg(long, default_value = "kro.rs", env = "KRO_RGD_GROUP")]
+    #[arg(long, default_value = "kro.run", env = "KRO_RGD_GROUP")]
     rgd_group: String,
     #[arg(long, default_value = "v1alpha1", env = "KRO_RGD_VERSION")]
     rgd_version: String,
-    #[arg(long, default_value = "kro.rs", env = "KRO_INSTANCE_GROUP")]
+    #[arg(long, default_value = "kro.run", env = "KRO_INSTANCE_GROUP")]
     instance_group: String,
     #[arg(long, default_value_t = 4)]
     workers: usize,

@@ -12,7 +12,7 @@ const FUNCTION_RGD: &str = include_str!("../../../manifests/rgd/function.yaml");
 #[test]
 fn function_route_splits_host_and_path() {
     let body: serde_json::Value = serde_yaml::from_str(FUNCTION_RGD).unwrap();
-    let rgd = api::parse(&body, "kro.rs").unwrap();
+    let rgd = api::parse(&body, "kro.run").unwrap();
     let compiled = graph::compile(&rgd, &EngineDefaults::default()).unwrap();
     let route = compiled
         .nodes

@@ -30,8 +30,8 @@ pub struct EngineDefaults {
 impl Default for EngineDefaults {
     fn default() -> Self {
         Self {
-            instance_group: "kro.rs".to_owned(),
-            rgd_group: "kro.rs".to_owned(),
+            instance_group: "kro.run".to_owned(),
+            rgd_group: "kro.run".to_owned(),
             rgd_version: "v1alpha1".to_owned(),
         }
     }
@@ -684,7 +684,7 @@ mod tests {
     }
 
     fn compile_body(resources: &Json, status: &Json) -> Result<CompiledGraph, CompileError> {
-        let parsed = api::parse(&rgd_body(resources, status), "kro.rs").unwrap();
+        let parsed = api::parse(&rgd_body(resources, status), "kro.run").unwrap();
         compile(&parsed, &EngineDefaults::default())
     }
 
@@ -748,14 +748,14 @@ mod tests {
         ]);
         let status = json!({"endpoint": "${configmap.data.host}"});
         let g = compile_body(&resources, &status).unwrap();
-        assert_eq!(g.instance_group, "kro.rs");
+        assert_eq!(g.instance_group, "kro.run");
         assert_eq!(g.instance_plural, "webstores");
         assert_eq!(g.instance_kind, "WebStore");
         assert!(g.namespaced);
         let crd = &g.instance_crd;
-        assert_eq!(crd["spec"]["group"], json!("kro.rs"));
+        assert_eq!(crd["spec"]["group"], json!("kro.run"));
         assert_eq!(crd["spec"]["names"]["kind"], json!("WebStore"));
-        assert_eq!(crd["metadata"]["name"], json!("webstores.kro.rs"));
+        assert_eq!(crd["metadata"]["name"], json!("webstores.kro.run"));
         let schema = &crd["spec"]["versions"][0]["schema"]["openAPIV3Schema"];
         assert_eq!(
             schema["properties"]["spec"]["properties"]["name"]["type"],
@@ -792,7 +792,7 @@ mod tests {
                 ]),
                 &json!({}),
             ),
-            "kro.rs",
+            "kro.run",
         )
         .unwrap();
         let h1 = spec_hash(&parsed.spec);
@@ -806,7 +806,7 @@ mod tests {
                 ]),
                 &json!({}),
             ),
-            "kro.rs",
+            "kro.run",
         )
         .unwrap();
         assert_ne!(h1, spec_hash(&parsed2.spec));
@@ -819,7 +819,7 @@ mod tests {
                 "metadata": {"name": "${each.name}"}},
              "forEach": [{"each": "${schema.spec.items}"}]}
         ]);
-        let parsed = api::parse(&rgd_body(&resources, &json!({})), "kro.rs").unwrap();
+        let parsed = api::parse(&rgd_body(&resources, &json!({})), "kro.run").unwrap();
         let node = build_node(&parsed.spec.resources[0], true).unwrap();
         assert!(node.dependencies.is_empty(), "{:?}", node.dependencies);
         assert_eq!(
@@ -841,7 +841,7 @@ mod tests {
                         "metadata": {"name": "out"}, "data": {"v": "${existing.data.k}"}}}
                 ]
             }
-        }), "kro.rs").unwrap();
+        }), "kro.run").unwrap();
         let g = compile(&parsed, &EngineDefaults::default()).unwrap();
         let ext = g.nodes.iter().find(|n| n.id == "existing").unwrap();
         assert!(ext.external);

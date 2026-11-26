@@ -498,10 +498,10 @@ mod tests {
 
     #[test]
     fn a_valid_rgd_parses() {
-        let rgd = parse(&rgd(), "kro.rs").unwrap();
+        let rgd = parse(&rgd(), "kro.run").unwrap();
         assert_eq!(rgd.name, "webstore");
         assert_eq!(rgd.spec.schema.kind, "WebStore");
-        assert_eq!(rgd.spec.schema.group.as_deref(), Some("kro.rs"));
+        assert_eq!(rgd.spec.schema.group.as_deref(), Some("kro.run"));
         assert_eq!(rgd.spec.resources[0].id, "configmap");
         assert_eq!(rgd.spec.resources[0].order, 0);
     }
@@ -510,20 +510,20 @@ mod tests {
     fn grammar_refusals() {
         let mut bad = rgd();
         bad["spec"]["schema"]["kind"] = json!("webStore");
-        assert!(parse(&bad, "kro.rs").is_err());
+        assert!(parse(&bad, "kro.run").is_err());
         let mut bad = rgd();
         bad["spec"]["schema"]["apiVersion"] = json!("v1-alpha");
-        assert!(parse(&bad, "kro.rs").is_err());
+        assert!(parse(&bad, "kro.run").is_err());
         let mut bad = rgd();
         bad["spec"]["resources"][0]["id"] = json!("web-cm");
-        assert!(parse(&bad, "kro.rs").is_err());
+        assert!(parse(&bad, "kro.run").is_err());
     }
 
     #[test]
     fn reserved_and_duplicate_ids_refuse() {
         let mut bad = rgd();
         bad["spec"]["resources"][0]["id"] = json!("each");
-        assert!(parse(&bad, "kro.rs").is_err());
+        assert!(parse(&bad, "kro.run").is_err());
         let mut bad = rgd();
         let first = bad["spec"]["resources"][0].clone();
         bad["spec"]["resources"]
@@ -532,7 +532,7 @@ mod tests {
             .push(first);
         let idx = bad["spec"]["resources"].as_array().expect("array").len() - 1;
         bad["spec"]["resources"][idx]["template"]["metadata"]["name"] = json!("other");
-        assert!(parse(&bad, "kro.rs").is_err());
+        assert!(parse(&bad, "kro.run").is_err());
     }
 
     #[test]
@@ -540,17 +540,17 @@ mod tests {
         let mut bad = rgd();
         bad["spec"]["resources"][0]["externalRef"] =
             json!({"apiVersion": "v1", "kind": "ConfigMap", "metadata": {"name": "x"}});
-        assert!(parse(&bad, "kro.rs").is_err());
+        assert!(parse(&bad, "kro.run").is_err());
         let mut bad = rgd();
         bad["spec"]["resources"][0]["template"] = Json::Null;
-        assert!(parse(&bad, "kro.rs").is_err());
+        assert!(parse(&bad, "kro.run").is_err());
     }
 
     #[test]
     fn policy_expressions_must_be_wrapped() {
         let mut bad = rgd();
         bad["spec"]["resources"][0]["readyWhen"] = json!(["configmap.data.ready == \"true\""]);
-        let err = parse(&bad, "kro.rs").unwrap_err();
+        let err = parse(&bad, "kro.run").unwrap_err();
         assert!(err.contains("readyWhen"), "{err}");
     }
 

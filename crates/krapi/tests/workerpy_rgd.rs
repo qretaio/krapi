@@ -10,7 +10,7 @@ const WORKERJS_RGD: &str = include_str!("../../../manifests/rgd/workerpy.yaml");
 #[test]
 fn workerpy_reuses_a_function_and_routes_to_it() {
     let body: serde_json::Value = serde_yaml::from_str(WORKERJS_RGD).unwrap();
-    let rgd = api::parse(&body, "kro.rs").unwrap();
+    let rgd = api::parse(&body, "kro.run").unwrap();
     let compiled = graph::compile(&rgd, &EngineDefaults::default()).unwrap();
     assert_eq!(compiled.instance_kind, "WorkerPy");
     assert_eq!(compiled.instance_plural, "workerpyapps");

@@ -1,14 +1,14 @@
 //! THE IDENTITY MARKS — every child the engine applies carries the same
 //! label family, and every read (ownership resolution, orphan pruning,
-//! deletion waves) is driven by them. The prefix is `kro.rs` (this
+//! deletion waves) is driven by them. The prefix is `kro.run` (this
 //! project's domain), the conventions upstream kro's.
 
 /// The label/annotation prefix.
-pub const LABEL_PREFIX: &str = "kro.rs";
+pub const LABEL_PREFIX: &str = "kro.run";
 
 /// The instance finalizer: an instance with this finalizer survives its
 /// DELETE until the children drain.
-pub const FINALIZER: &str = "kro.rs/finalizer";
+pub const FINALIZER: &str = "kro.run/finalizer";
 
 /// `app.kubernetes.io/managed-by` value.
 pub const MANAGED_BY_VALUE: &str = "kro-rs";
@@ -16,22 +16,22 @@ pub const MANAGED_BY_VALUE: &str = "kro-rs";
 pub const MANAGED_BY_KEY: &str = "app.kubernetes.io/managed-by";
 
 /// The node id that produced the child (forEach expansions share it).
-pub const NODE_ID_LABEL: &str = "kro.rs/node-id";
+pub const NODE_ID_LABEL: &str = "kro.run/node-id";
 /// The child is engine-owned.
-pub const OWNED_LABEL: &str = "kro.rs/owned";
+pub const OWNED_LABEL: &str = "kro.run/owned";
 /// The reverse-topological deletion wave the child sits in.
-pub const APPLY_ORDER_LABEL: &str = "kro.rs/apply-order";
+pub const APPLY_ORDER_LABEL: &str = "kro.run/apply-order";
 
 /// The owning instance's identity labels (the child → instance join).
-pub const INSTANCE_NAME_LABEL: &str = "kro.rs/instance-name";
-pub const INSTANCE_NAMESPACE_LABEL: &str = "kro.rs/instance-namespace";
-pub const INSTANCE_UID_LABEL: &str = "kro.rs/instance-uid";
-pub const INSTANCE_GROUP_LABEL: &str = "kro.rs/instance-group";
-pub const INSTANCE_VERSION_LABEL: &str = "kro.rs/instance-version";
-pub const INSTANCE_KIND_LABEL: &str = "kro.rs/instance-kind";
+pub const INSTANCE_NAME_LABEL: &str = "kro.run/instance-name";
+pub const INSTANCE_NAMESPACE_LABEL: &str = "kro.run/instance-namespace";
+pub const INSTANCE_UID_LABEL: &str = "kro.run/instance-uid";
+pub const INSTANCE_GROUP_LABEL: &str = "kro.run/instance-group";
+pub const INSTANCE_VERSION_LABEL: &str = "kro.run/instance-version";
+pub const INSTANCE_KIND_LABEL: &str = "kro.run/instance-kind";
 
 /// The RGD that compiled the graph the child came from.
-pub const RGD_NAME_LABEL: &str = "kro.rs/rgd-name";
+pub const RGD_NAME_LABEL: &str = "kro.run/rgd-name";
 
 /// Stamp the instance-identity labels onto a child object. The instance
 /// labels are the join key: a child event resolves its owning instance
@@ -76,7 +76,7 @@ pub fn stamp_instance_labels(
 #[must_use]
 pub fn owning_instance(obj: &serde_json::Value) -> Option<(Option<String>, String)> {
     let owned = obj
-        .pointer("/metadata/labels/kro.rs~1owned")
+        .pointer("/metadata/labels/kro.run~1owned")
         .and_then(serde_json::Value::as_str)
         == Some("true");
     let name = obj

@@ -649,7 +649,7 @@ fn handle_child_event(state: &Arc<Mutex<State>>, work_tx: &mpsc::Sender<InstKey>
     // The owner labels name the instance kind — find the RGD whose
     // instance kind matches and enqueue that instance.
     let label_kind = body
-        .pointer("/metadata/labels/kro.rs~1instance-kind")
+        .pointer("/metadata/labels/kro.run~1instance-kind")
         .and_then(Json::as_str)
         .unwrap_or_default();
     for graph in s.graphs.values() {

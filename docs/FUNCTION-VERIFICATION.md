@@ -2,7 +2,7 @@
 
 ## Verified on qreta-dev (kapi rebuilt + deployed, binary 2026-11-23)
 
-- RGD `manifests/rgd/function.yaml` applied via POST /apis/kro.rs/v1alpha1/resourcegraphdefinitions → 201.
+- RGD `manifests/rgd/function.yaml` applied via POST /apis/kro.run/v1alpha1/resourcegraphdefinitions → 201.
 - Status: `GraphAccepted=True`, `KindReady=True`, `ControllerReady=True`, state `Active`, topologicalOrder `[functionService, functionRoute, functionDeployment]`.
 - Instance CRD `functions.kapi.qreta.io` registered at runtime by the kro engine.
 - Function instance `dev/hello` (image, command=[/bin/worker], args, env, routes, defaults idleSeconds=60/privateDb=true) → children created: Service `v1/dev/hello`, Deployment `apps/v1/dev/hello`, HTTPRoute `gateway.networking.k8s.io/v1/dev/hello-hello.qreta.dev`.

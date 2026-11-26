@@ -86,7 +86,7 @@ async fn workerjs_reuses_a_function_and_adds_routes() {
         let (code, _) = http_json(
             "POST",
             &url,
-            "/apis/kro.rs/v1alpha1/resourcegraphdefinitions",
+            "/apis/kro.run/v1alpha1/resourcegraphdefinitions",
             Some(body.to_string()),
         )
         .await;

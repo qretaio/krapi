@@ -95,7 +95,7 @@ async fn the_function_rgd_reconciles_a_function_instance() {
     let (code, _) = http_json(
         "POST",
         &url,
-        "/apis/kro.rs/v1alpha1/resourcegraphdefinitions",
+        "/apis/kro.run/v1alpha1/resourcegraphdefinitions",
         Some(body.to_string()),
     )
     .await;
@@ -105,7 +105,7 @@ async fn the_function_rgd_reconciles_a_function_instance() {
         let (code, body) = http_json(
             "GET",
             &url,
-            "/apis/kro.rs/v1alpha1/resourcegraphdefinitions/function",
+            "/apis/kro.run/v1alpha1/resourcegraphdefinitions/function",
             None,
         )
         .await;
@@ -287,7 +287,7 @@ async fn the_function_rgd_reconciles_a_function_instance() {
     assert!(
         inst["metadata"]["finalizers"]
             .as_array()
-            .is_some_and(|f| f.iter().any(|x| x == "kro.rs/finalizer")),
+            .is_some_and(|f| f.iter().any(|x| x == "kro.run/finalizer")),
     );
 
     // Wave deletion: the instance drains, the Service/HTTPRoutes/Deployment go.

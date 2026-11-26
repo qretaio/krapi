@@ -91,7 +91,7 @@ GVR. The engine runs:
 
 ### Reconcile (one instance, non-deleting)
 
-1. Stamp the finalizer (`kro.rs/finalizer`) and instance labels — compare-then-
+1. Stamp the finalizer (`kro.run/finalizer`) and instance labels — compare-then-
    patch, the patch-loop guard.
 2. Look up the compiled graph; absent/stale → recompile from the stored RGD.
 3. Walk the topological order. Per node:
@@ -107,7 +107,7 @@ GVR. The engine runs:
      compile time),
    - apply: get-by-label + name → create when absent, merge-patch when the
      rendered fields differ (compare-then-patch), stamp the kro labels
-     (`kro.rs/node-id`, `.owned=true`, instance identity, apply-order wave,
+     (`kro.run/node-id`, `.owned=true`, instance identity, apply-order wave,
      `app.kubernetes.io/managed-by=kro`),
    - `readyWhen` all true → node ready, observed object published to the scope;
      otherwise the node stays pending (soft not-ready) and gates dependents.

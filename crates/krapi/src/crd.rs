@@ -88,7 +88,7 @@ mod tests {
             "state": {"type": "string"}
         }});
         let crd = synthesize(
-            "kro.rs",
+            "kro.run",
             "v1alpha1",
             "WebStore",
             "webstores",
@@ -99,8 +99,8 @@ mod tests {
         );
         assert_eq!(crd["apiVersion"], json!("apiextensions.k8s.io/v1"));
         assert_eq!(crd["kind"], json!("CustomResourceDefinition"));
-        assert_eq!(crd["metadata"]["name"], json!("webstores.kro.rs"));
-        assert_eq!(crd["spec"]["group"], json!("kro.rs"));
+        assert_eq!(crd["metadata"]["name"], json!("webstores.kro.run"));
+        assert_eq!(crd["spec"]["group"], json!("kro.run"));
         assert_eq!(crd["spec"]["scope"], json!("Namespaced"));
         assert_eq!(crd["spec"]["names"]["singular"], json!("webstore"));
         assert_eq!(crd["spec"]["names"]["listKind"], json!("WebStoreList"));
@@ -127,7 +127,7 @@ mod tests {
         let spec = json!({"type": "object"});
         let status = json!({"type": "object"});
         let crd = synthesize(
-            "kro.rs",
+            "kro.run",
             "v1alpha1",
             "Zone",
             "zones",

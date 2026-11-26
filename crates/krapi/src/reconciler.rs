@@ -59,10 +59,10 @@ pub struct Plan {
 pub type Children = BTreeMap<String, Vec<Json>>;
 
 /// JSON-pointer escape for a label key (dots are safe, `/` is not).
-const NODE_ID_POINTER: &str = "/metadata/labels/kro.rs~1node-id";
-const INSTANCE_UID_POINTER: &str = "/metadata/labels/kro.rs~1instance-uid";
-const INSTANCE_NAME_POINTER: &str = "/metadata/labels/kro.rs~1instance-name";
-const INSTANCE_NS_POINTER: &str = "/metadata/labels/kro.rs~1instance-namespace";
+const NODE_ID_POINTER: &str = "/metadata/labels/kro.run~1node-id";
+const INSTANCE_UID_POINTER: &str = "/metadata/labels/kro.run~1instance-uid";
+const INSTANCE_NAME_POINTER: &str = "/metadata/labels/kro.run~1instance-name";
+const INSTANCE_NS_POINTER: &str = "/metadata/labels/kro.run~1instance-namespace";
 
 /// Run one reconcile pass.
 #[allow(clippy::too_many_lines)] // the walk is the law; splitting it scatters the order
@@ -1013,7 +1013,7 @@ pub fn instance_name(instance: &Json) -> String {
 /// Does this row carry the engine's instance labels for this instance?
 pub fn owned_by_instance(row: &Json, instance: &Json) -> bool {
     if row
-        .pointer("/metadata/labels/kro.rs~1owned")
+        .pointer("/metadata/labels/kro.run~1owned")
         .and_then(Json::as_str)
         != Some("true")
     {
@@ -1136,13 +1136,13 @@ mod tests {
                 "resources": resources
             }
         });
-        let parsed = api::parse(&body, "kro.rs").unwrap();
+        let parsed = api::parse(&body, "kro.run").unwrap();
         compile(&parsed, &EngineDefaults::default()).unwrap()
     }
 
     fn instance(spec: &Json) -> Json {
         json!({
-            "apiVersion": "kro.rs/v1alpha1", "kind": "WebStore",
+            "apiVersion": "kro.run/v1alpha1", "kind": "WebStore",
             "metadata": {"name": "shop", "namespace": "acme", "uid": "inst-1", "generation": 1},
             "spec": spec
         })
@@ -1156,16 +1156,16 @@ mod tests {
     /// fixtures carry it so a converged child never re-patches.
     fn stamped_labels(node: &str) -> serde_json::Value {
         serde_json::json!({
-            "kro.rs/node-id": node,
-            "kro.rs/owned": "true",
+            "kro.run/node-id": node,
+            "kro.run/owned": "true",
             "app.kubernetes.io/managed-by": "kro-rs",
-            "kro.rs/instance-name": "shop",
-            "kro.rs/instance-uid": "inst-1",
-            "kro.rs/instance-namespace": "acme",
-            "kro.rs/instance-kind": "WebStore",
-            "kro.rs/instance-group": "kro.rs",
-            "kro.rs/instance-version": "v1alpha1",
-            "kro.rs/rgd-name": "webstore"
+            "kro.run/instance-name": "shop",
+            "kro.run/instance-uid": "inst-1",
+            "kro.run/instance-namespace": "acme",
+            "kro.run/instance-kind": "WebStore",
+            "kro.run/instance-group": "kro.run",
+            "kro.run/instance-version": "v1alpha1",
+            "kro.run/rgd-name": "webstore"
         })
     }
 
@@ -1204,10 +1204,10 @@ mod tests {
                 assert_eq!(body["metadata"]["namespace"], json!("acme"));
                 assert_eq!(target.plural, "configmaps");
                 assert_eq!(
-                    body["metadata"]["labels"]["kro.rs/node-id"],
+                    body["metadata"]["labels"]["kro.run/node-id"],
                     json!("configmap")
                 );
-                assert_eq!(body["metadata"]["labels"]["kro.rs/owned"], json!("true"));
+                assert_eq!(body["metadata"]["labels"]["kro.run/owned"], json!("true"));
             }
             other => panic!("expected the configmap create, got {other:?}"),
         }
@@ -1280,7 +1280,7 @@ mod tests {
         // the instance already carries the finalizer + labels
         let mut inst = instance(&json!({"name": "shop"}));
         inst["metadata"]["finalizers"] = json!([crate::labels::FINALIZER]);
-        inst["metadata"]["labels"] = json!({"kro.rs/rgd-name": "webstore"});
+        inst["metadata"]["labels"] = json!({"kro.run/rgd-name": "webstore"});
         let plan = reconcile(&g, &inst, &children, "2026-01-01T00:00:00Z");
         assert_eq!(
             verbs(&plan),
@@ -1321,7 +1321,7 @@ mod tests {
         );
         let mut inst = instance(&json!({"name": "shop", "monitoring": false}));
         inst["metadata"]["finalizers"] = json!([crate::labels::FINALIZER]);
-        inst["metadata"]["labels"] = json!({"kro.rs/rgd-name": "webstore"});
+        inst["metadata"]["labels"] = json!({"kro.run/rgd-name": "webstore"});
         let children = Children::from([(
             "core/v1/configmaps@*".to_owned(),
             vec![json!({
@@ -1360,8 +1360,8 @@ mod tests {
         let owned = |node: &str, name: &str| {
             json!({
                 "metadata": {"name": name, "namespace": "acme",
-                    "labels": {"kro.rs/node-id": node, "kro.rs/owned": "true",
-                               "kro.rs/instance-uid": "inst-1", "kro.rs/instance-name": "shop"}}
+                    "labels": {"kro.run/node-id": node, "kro.run/owned": "true",
+                               "kro.run/instance-uid": "inst-1", "kro.run/instance-name": "shop"}}
             })
         };
         let children = Children::from([
@@ -1423,7 +1423,7 @@ mod tests {
         );
         let mut inst = instance(&json!({"name": "shop", "regions": ["eu", "us"]}));
         inst["metadata"]["finalizers"] = json!([crate::labels::FINALIZER]);
-        inst["metadata"]["labels"] = json!({"kro.rs/rgd-name": "webstore"});
+        inst["metadata"]["labels"] = json!({"kro.run/rgd-name": "webstore"});
         let plan = reconcile(&g, &inst, &Children::new(), "2026-01-01T00:00:00Z");
         let names: Vec<String> = plan
             .actions
@@ -1456,7 +1456,7 @@ mod tests {
         );
         let mut inst = instance(&json!({"name": "shop"}));
         inst["metadata"]["finalizers"] = json!([crate::labels::FINALIZER]);
-        inst["metadata"]["labels"] = json!({"kro.rs/rgd-name": "webstore"});
+        inst["metadata"]["labels"] = json!({"kro.run/rgd-name": "webstore"});
         let children = Children::from([(
             "core/v1/configmaps@*".to_owned(),
             vec![json!({
@@ -1488,7 +1488,7 @@ mod tests {
         );
         let mut inst = instance(&json!({"name": "shop"}));
         inst["metadata"]["finalizers"] = json!([crate::labels::FINALIZER]);
-        inst["metadata"]["labels"] = json!({"kro.rs/rgd-name": "webstore"});
+        inst["metadata"]["labels"] = json!({"kro.run/rgd-name": "webstore"});
         let children = Children::from([(
             "core/v1/configmaps@*".to_owned(),
             vec![json!({
