@@ -298,9 +298,9 @@ pub fn parse(body: &Json, default_group: &str) -> Result<ResourceGraphDefinition
         .get("resources")
         .and_then(Json::as_array)
         .ok_or("spec.resources is required")?;
-    if resources_in.is_empty() {
-        return Err("spec.resources must carry at least one resource".to_owned());
-    }
+    // A definition-only RGD (e.g. AssetsOnlyApp) carries no resources: it
+    // publishes an instance CRD for kapigate/other readers to consume and
+    // has nothing for the engine to reconcile. Zero nodes is legal.
     let mut resources = Vec::with_capacity(resources_in.len());
     let mut seen = std::collections::BTreeSet::new();
     for (i, r) in resources_in.iter().enumerate() {
